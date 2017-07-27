@@ -25,6 +25,7 @@ int main()
     txt.setPosition(0,22);
     Text txtCircuit[16];
     Text txtDelta[16];
+    Text txtSomme("",arial,22);
 
     //fichier pb
     int pb[17];
@@ -64,6 +65,8 @@ int main()
         txtDelta[i].setFont(arial);
         txtDelta[i].setPosition(180,(3+i)*22);
     }
+
+    txtSomme.setPosition(180,44);
 
     txtCircuit[0].setString(" LC  --");
     txtCircuit[1].setString(" PB  --");
@@ -130,6 +133,7 @@ int main()
     for(int i=0; i<16; i++)
         fait[i] = 0;
 
+    int somme_pb = 0;
     while(win.isOpen())
     {
         Event event;
@@ -163,6 +167,10 @@ int main()
         littleBigEndian(value);
         int scoreboard_v = value;
 
+        char buff[100]; // code nul pour corriger un bug
+        sprintf(buff,"%d",value); // pareil
+
+
         if(scoreboard_v < 0)
         {
             //reset
@@ -188,6 +196,8 @@ int main()
                 txtDelta[i].setString("");
             }
             txt.setString(" Total -- 00:00:000");
+            somme_pb = 0;
+            txtSomme.setString("");
         }
         else
         {
@@ -228,6 +238,23 @@ int main()
                     {
                         int delta = value - pb[i];
 
+                        somme_pb += delta;
+
+                        minute = abs((somme_pb/1000)/60);
+                        sec = abs((somme_pb/1000)%60);
+
+                        if(somme_pb > 0)
+                        {
+                            txtSomme.setFillColor(Color(255,0,0));
+                            sprintf(buff,"+%02d:%02d",minute,sec);
+                        }
+                        else
+                        {
+                            txtSomme.setFillColor(Color(0,255,0));
+                            sprintf(buff,"-%02d:%02d",minute,sec);
+                        }
+
+                        txtSomme.setString(buff);
 
                         minute = abs((delta/1000)/60);
                         sec = abs((delta/1000)%60);
@@ -235,7 +262,7 @@ int main()
                         if(delta > 0)
                         {
                             txtDelta[i].setFillColor(Color(255,0,0));
-                            sprintf(buff," %02d:%02d",minute,sec);
+                            sprintf(buff,"+%02d:%02d",minute,sec);
                         }
                         else
                         {
@@ -296,6 +323,7 @@ int main()
 
         win.clear();
         win.draw(txt);
+        win.draw(txtSomme);
         for(int i=0; i<16; i++)
         {
             win.draw(txtCircuit[i]);
