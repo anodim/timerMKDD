@@ -1,0 +1,8 @@
+Fonctionne uniquement avec la version 64 bit de dolphin
+Pour lancer l'appli, ouvrer l'exe se situant dans ./bin/release/timerMKDD.exe
+Une fois l'appli lancer plus rien a faire les temps se metteront a la fin de chaque circuit
+
+Pour comparé avec votre pb et non celui fournit, supprimer le fichier ./bin/release/pbMKDD.txt
+
+
+bug : fermer dolphin lorsque le tableau des score est afficher et que le championnat n'est pas fini enregistre un faux pb
