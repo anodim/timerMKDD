@@ -196,6 +196,7 @@ int main()
                 txtDelta[i].setString("");
             }
             txt.setString(" Total -- 00:00:000");
+            txt.setFillColor(Color(255,255,255));
             somme_pb = 0;
             txtSomme.setString("");
         }
