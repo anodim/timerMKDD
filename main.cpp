@@ -1,4 +1,4 @@
-//image?
+//image
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <windows.h>
@@ -16,17 +16,27 @@ using namespace sf;
 
 int main()
 {
-    RenderWindow win(VideoMode(260,600),"Ano\'s auto-spliter");
+    RenderWindow win(VideoMode(306,600),"Ano\'s auto-spliter");
 
     win.setFramerateLimit(20);
 
     Font arial;
     arial.loadFromFile("../../Font/cour.ttf");
     Text txt(" Temps totals    -- 00 : 00 : 000",arial,22);
-    txt.setPosition(0,22);
+    txt.setPosition(0,10);
     Text txtCircuit[16];
     Text txtDelta[16];
     Text txtSomme("",arial,22);
+
+    Texture img;
+    if(img.loadFromFile("img.png"))
+    {
+      //img non charger
+    }
+
+    Sprite img_s;
+    img_s.setTexture(img);
+    img_s.setPosition(0,425);
 
     //fichier pb
     int pb[17];
@@ -64,10 +74,10 @@ int main()
 
         txtDelta[i].setCharacterSize(22);
         txtDelta[i].setFont(arial);
-        txtDelta[i].setPosition(180,(3+i)*22);
+        txtDelta[i].setPosition(225,(3+i)*22);
     }
 
-    txtSomme.setPosition(180,44);
+    txtSomme.setPosition(118,34);
 
     txtCircuit[0].setString(" LC  --");
     txtCircuit[1].setString(" PB  --");
@@ -135,6 +145,7 @@ int main()
         fait[i] = 0;
 
     int somme_pb = 0;
+    int nbFait = 0;
     while(win.isOpen())
     {
         Event event;
@@ -200,6 +211,7 @@ int main()
             txt.setFillColor(Color(255,255,255));
             somme_pb = 0;
             txtSomme.setString("");
+            nbFait = 0;
         }
         else
         {
@@ -226,6 +238,10 @@ int main()
                 if(value == scoreboard_v && fait[i] != 1 && scoreboard_v != 0)
                 {
                     fait[i] = 1;
+                    nbFait++;
+
+                    img_s.setTextureRect(IntRect(306*nbFait,0,306,161));
+
                     newPb[i] = value;
                     minute = (value/1000)/60;
                     sec = (value/1000)%60;
@@ -233,7 +249,7 @@ int main()
 
                     char buff[100];
 
-                    sprintf(buff,"%s %02d:%02d",((string)txtCircuit[i].getString()).c_str(),minute,sec);
+                    sprintf(buff,"%s %02d:%02d:%03d",((string)txtCircuit[i].getString()).c_str(),minute,sec,milli);
 
                     txtCircuit[i].setString(buff);
                     if(pb[i] != 5999998)
@@ -244,16 +260,17 @@ int main()
 
                         minute = abs((somme_pb/1000)/60);
                         sec = abs((somme_pb/1000)%60);
+                        milli = somme_pb - (somme_pb/1000)*1000;
 
                         if(somme_pb > 0)
                         {
                             txtSomme.setFillColor(Color(255,0,0));
-                            sprintf(buff,"+%02d:%02d",minute,sec);
+                            sprintf(buff,"+%02d:%02d:%03d",minute,sec,milli);
                         }
                         else
                         {
                             txtSomme.setFillColor(Color(0,255,0));
-                            sprintf(buff,"-%02d:%02d",minute,sec);
+                            sprintf(buff,"-%02d:%02d:%03d",minute,sec,milli);
                         }
 
                         txtSomme.setString(buff);
@@ -324,6 +341,7 @@ int main()
         }
 
         win.clear();
+        win.draw(img_s);
         win.draw(txt);
         win.draw(txtSomme);
         for(int i=0; i<16; i++)
