@@ -260,7 +260,7 @@ int main()
 
                         minute = abs((somme_pb/1000)/60);
                         sec = abs((somme_pb/1000)%60);
-                        milli = somme_pb - (somme_pb/1000)*1000;
+                        milli = abs(somme_pb - (somme_pb/1000)*1000);
 
                         if(somme_pb > 0)
                         {
