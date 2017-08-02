@@ -1,4 +1,3 @@
-//image
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <windows.h>
@@ -16,55 +15,18 @@ using namespace sf;
 
 int main()
 {
-    RenderWindow win(VideoMode(306,600),"Ano\'s auto-spliter");
+    char buff[100];
+    RenderWindow win(VideoMode(260,600),"Ano\'s auto-spliter");
 
     win.setFramerateLimit(20);
 
     Font arial;
     arial.loadFromFile("../../Font/cour.ttf");
     Text txt(" Temps totals    -- 00 : 00 : 000",arial,22);
-    txt.setPosition(0,10);
+    txt.setPosition(0,22);
     Text txtCircuit[16];
     Text txtDelta[16];
     Text txtSomme("",arial,22);
-
-    Texture img;
-    if(img.loadFromFile("img.png"))
-    {
-      //img non charger
-    }
-
-    Sprite img_s;
-    img_s.setTexture(img);
-    img_s.setPosition(0,425);
-
-    //fichier pb
-    int pb[17];
-    int newPb[17];
-    ifstream fichier("pbMKDD.txt");
-    if(fichier)
-    {
-        string ligne;
-
-
-        for(int i=0; i<17; i++)
-        {
-            getline(fichier,ligne);
-            pb[i] = atoi(ligne.c_str());
-        }
-    }
-    else
-    {
-        ofstream file("log.txt",ios_base::app);
-        file << "fichier non trouver" << endl;
-
-        for(int i=0; i<17; i++)
-        {
-            ofstream file2("pbMKDD.txt",ios_base::app);
-            file2 << "5999998" << endl;
-            pb[i] = 5999998;
-        }
-    }
 
     for(int i=0; i<16; i++)
     {
@@ -74,10 +36,10 @@ int main()
 
         txtDelta[i].setCharacterSize(22);
         txtDelta[i].setFont(arial);
-        txtDelta[i].setPosition(225,(3+i)*22);
+        txtDelta[i].setPosition(180,(3+i)*22);
     }
 
-    txtSomme.setPosition(118,34);
+    txtSomme.setPosition(180,44);
 
     txtCircuit[0].setString(" LC  --");
     txtCircuit[1].setString(" PB  --");
@@ -145,7 +107,6 @@ int main()
         fait[i] = 0;
 
     int somme_pb = 0;
-    int nbFait = 0;
     while(win.isOpen())
     {
         Event event;
@@ -157,197 +118,73 @@ int main()
                 win.close();
         }
 
-        int minute = 0;
-        int sec = 0;
-        int milli = 0;
+        hwnd = FindWindow(NULL,"Dolphin 5.0");
 
-
-        if(!hwnd)
-        {
-            hwnd = FindWindow(NULL,"Dolphin 5.0");
-        }
+        sprintf(buff," proc find : %d",hwnd); // pareil
+        txt.setString(buff);
 
         HANDLE phandle = 0;
-        if(!phandle) //Once again, if it fails, tell us
-        {
-            GetWindowThreadProcessId(hwnd,&pid); //Get the process id and place it in pid
-            phandle = OpenProcess(PROCESS_VM_READ,0,pid); //Get permission to read
-        }
+
+        GetWindowThreadProcessId(hwnd,&pid); //Get the process id and place it in pid
+
+        sprintf(buff," pid find : %d",pid); // pareil
+        txtCircuit[0].setString(buff);
+
+        phandle = OpenProcess(PROCESS_VM_READ,0,pid); //Get permission to read
+        sprintf(buff," phandle : %d",phandle); // pareil
+        txtCircuit[1].setString(buff);
+
 
         address = scoreboard;
         ReadProcessMemory(phandle,(void*)address,&value,sizeof(value),0);
         littleBigEndian(value);
+        sprintf(buff," mem? : %d",value); // pareil
+
+        txtCircuit[2].setString(buff);
+        address = 0x80378000;
+        ReadProcessMemory(phandle,(void*)address,&value,sizeof(value),0);
+
+        sprintf(buff," adress mk : %d",value); // pareil
+
+        txtCircuit[3].setString(buff);
+
+        sprintf(buff," error : %d",GetLastError()); // pareil
+
+        txtCircuit[4].setString(buff);
+
+        littleBigEndian(value);
         int scoreboard_v = value;
 
-        char buff[100]; // code nul pour corriger un bug
         sprintf(buff,"%d",value); // pareil
 
-
-        if(scoreboard_v < 0)
+        for(int i=0; i<16; i++)
         {
-            //reset
-            txtCircuit[0].setString(" LC  --");
-            txtCircuit[1].setString(" PB  --");
-            txtCircuit[2].setString(" BP  --");
-            txtCircuit[3].setString(" DDD --");
-            txtCircuit[4].setString(" MB  --");
-            txtCircuit[5].setString(" MaC --");
-            txtCircuit[6].setString(" DC  --");
-            txtCircuit[7].setString(" WS  --");
-            txtCircuit[8].setString(" SL  --");
-            txtCircuit[9].setString(" MuC --");
-            txtCircuit[10].setString(" YC  --");
-            txtCircuit[11].setString(" DKM --");
-            txtCircuit[12].setString(" WC  --");
-            txtCircuit[13].setString(" DDJ --");
-            txtCircuit[14].setString(" BC  --");
-            txtCircuit[15].setString(" RR  --");
-            for(int i=0; i<16; i++)
-            {
-                fait[i] = 0;
-                txtDelta[i].setString("");
-            }
-            txt.setString(" Total -- 00:00:000");
-            txt.setFillColor(Color(255,255,255));
-            somme_pb = 0;
-            txtSomme.setString("");
-            nbFait = 0;
-        }
-        else
-        {
-
-            for(int i=0; i<16; i++)
-            {
-                address = circuit[i];
-                ReadProcessMemory(phandle,(void*)address,&value,sizeof(value),0);
-                littleBigEndian(value);
-
-                int value2;
-                if(fait[i] != 1)
-                {
-                    address = circuit[i] + 0x20;
-                    ReadProcessMemory(phandle,(void*)address,&value2,sizeof(value2),0);
-                    littleBigEndian(value2);
-                    if(value2 == scoreboard_v)
-                    {
-                        value = value2;
-                    }
-
-                }
-
-                if(value == scoreboard_v && fait[i] != 1 && scoreboard_v != 0)
-                {
-                    fait[i] = 1;
-                    nbFait++;
-
-                    img_s.setTextureRect(IntRect(306*nbFait,0,306,161));
-
-                    newPb[i] = value;
-                    minute = (value/1000)/60;
-                    sec = (value/1000)%60;
-                    milli = value - (value/1000)*1000;
-
-                    char buff[100];
-
-                    sprintf(buff,"%s %02d:%02d:%03d",((string)txtCircuit[i].getString()).c_str(),minute,sec,milli);
-
-                    txtCircuit[i].setString(buff);
-                    if(pb[i] != 5999998)
-                    {
-                        int delta = value - pb[i];
-
-                        somme_pb += delta;
-
-                        minute = abs((somme_pb/1000)/60);
-                        sec = abs((somme_pb/1000)%60);
-                        milli = abs(somme_pb - (somme_pb/1000)*1000);
-
-                        if(somme_pb > 0)
-                        {
-                            txtSomme.setFillColor(Color(255,0,0));
-                            sprintf(buff,"+%02d:%02d:%03d",minute,sec,milli);
-                        }
-                        else
-                        {
-                            txtSomme.setFillColor(Color(0,255,0));
-                            sprintf(buff,"-%02d:%02d:%03d",minute,sec,milli);
-                        }
-
-                        txtSomme.setString(buff);
-
-                        minute = abs((delta/1000)/60);
-                        sec = abs((delta/1000)%60);
-
-                        if(delta > 0)
-                        {
-                            txtDelta[i].setFillColor(Color(255,0,0));
-                            sprintf(buff,"+%02d:%02d",minute,sec);
-                        }
-                        else
-                        {
-                            txtDelta[i].setFillColor(Color(0,255,0));
-                            sprintf(buff,"-%02d:%02d",minute,sec);
-                        }
-
-                        txtDelta[i].setString(buff);
-                    }
-                    else
-                    {
-                        txtDelta[i].setFillColor(Color(216,175,31));
-                        sprintf(buff,"%02d:%02d",minute,sec);
-                        txtDelta[i].setString(buff);
-                    }
-
-                }
-            }
-
-            address = tpsTotalGC;
+            address = circuit[i];
             ReadProcessMemory(phandle,(void*)address,&value,sizeof(value),0);
             littleBigEndian(value);
 
-            minute = (value/1000)/60;
-            sec = (value/1000)%60;
-            milli = value - (value/1000)*1000;
-
-            if(fait[15] == 1) // fin
+            int value2;
+            if(fait[i] != 1)
             {
-                int tmp = 0;
-                for(int i=0; i<16; i++)
+                address = circuit[i] + 0x20;
+                ReadProcessMemory(phandle,(void*)address,&value2,sizeof(value2),0);
+                littleBigEndian(value2);
+                if(value2 == scoreboard_v)
                 {
-                    tmp += newPb[i];
+                    value = value2;
                 }
-                newPb[16] = value;
-                if(tmp == newPb[16])
-                {
-                    txt.setFillColor(Color(255,0,0));
-                    if(pb[16]>newPb[16])
-                    {
-                        txt.setFillColor(Color(0,255,0));
-                        ofstream file("pbMKDD.txt",ios::out | ios::trunc);
-                        for(int i=0; i<17; i++)
-                        {
-                            // ecrire nouveau fichier
-                            file << newPb[i] << endl;
-                        }
-                    }
-                }
+
             }
-
-            char buff[100];
-
-            sprintf(buff," Total -- %02d:%02d:%03d",minute,sec,milli);
-
-            txt.setString(buff);
         }
 
+
         win.clear();
-        win.draw(img_s);
         win.draw(txt);
         win.draw(txtSomme);
-        for(int i=0; i<16; i++)
+        for(int i=0; i<5; i++)
         {
             win.draw(txtCircuit[i]);
-            win.draw(txtDelta[i]);
+            //win.draw(txtDelta[i]);
         }
         win.display();
     }
