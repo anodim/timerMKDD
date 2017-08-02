@@ -2,7 +2,6 @@
 #include <SFML/Graphics.hpp>
 #include <windows.h>
 #include <string>
-#include <fstream>
 
 void littleBigEndian (int &x)
 {
