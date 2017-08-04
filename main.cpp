@@ -5,6 +5,9 @@
 #include <string>
 #include <fstream>
 
+#define FONT_TITLE_SIZE 33
+#define FONT_SPLIT_SIZE 22
+
 void littleBigEndian (int &x)
 {
     x = ((x >> 24) & 0xffL) | ((x >> 8) & 0xff00L) | ((x << 8) & 0xff0000L)
@@ -16,18 +19,6 @@ using namespace sf;
 
 int main()
 {
-    RenderWindow win(VideoMode(306,600),"Ano\'s auto-spliter");
-
-    win.setFramerateLimit(20);
-
-    Font arial;
-    arial.loadFromFile("../../Font/pixelade.TTF");
-    Text txt(" Temps totals    -- 00 : 00 : 000",arial,33);
-    txt.setPosition(0,10);
-    Text txtCircuit[16];
-    Text txtDelta[16];
-    Text txtSomme("",arial,22);
-
     Texture img;
     if(img.loadFromFile("img.png"))
     {
@@ -36,7 +27,25 @@ int main()
 
     Sprite img_s;
     img_s.setTexture(img);
-    img_s.setPosition(0,425);
+    img_s.setPosition(0,20*FONT_SPLIT_SIZE);//425
+
+    int win_largeur = img.getSize().x/16;
+    int win_hauteur = 20*FONT_SPLIT_SIZE+img.getSize().y;
+
+    RenderWindow win(VideoMode(win_largeur,win_hauteur),"Ano\'s auto-spliter");
+
+    win.setPosition(Vector2i(1920,0));// a virer <----------------------------------------------------------------------------------------
+    win.setFramerateLimit(20);
+
+    Font arial;
+    arial.loadFromFile("../../Font/pixelade.TTF");
+    Text txt("Total -- 00:00:000",arial,FONT_TITLE_SIZE);
+    txt.setPosition((win_largeur/2)-(txt.getLocalBounds().width/2),0);
+    Text txtCircuit[16];
+    Text txtDelta[16];
+    Text txtTempsCircuit[16];
+    Text txtSomme("+00:00:000",arial,FONT_SPLIT_SIZE);
+
 
     //fichier pb
     int pb[17];
@@ -68,33 +77,39 @@ int main()
 
     for(int i=0; i<16; i++)
     {
-        txtCircuit[i].setCharacterSize(22);
+        txtCircuit[i].setCharacterSize(FONT_SPLIT_SIZE);
         txtCircuit[i].setFont(arial);
-        txtCircuit[i].setPosition(0,(3+i)*22);
+        txtCircuit[i].setPosition(30,(3+i)*FONT_SPLIT_SIZE);
 
-        txtDelta[i].setCharacterSize(22);
+        txtTempsCircuit[i].setCharacterSize(FONT_SPLIT_SIZE);
+        txtTempsCircuit[i].setFont(arial);
+        txtTempsCircuit[i].setPosition(30+40,(3+i)*FONT_SPLIT_SIZE);
+        txtTempsCircuit[i].setString(" -- ");
+
+        txtDelta[i].setCharacterSize(FONT_SPLIT_SIZE);
         txtDelta[i].setFont(arial);
-        txtDelta[i].setPosition(225,(3+i)*22);
+        txtDelta[i].setPosition(175,(3+i)*FONT_SPLIT_SIZE);
     }
 
-    txtSomme.setPosition(118,34);
+    txtSomme.setPosition((win_largeur/2)-(txtSomme.getLocalBounds().width/2),FONT_TITLE_SIZE);
+    txtSomme.setString("");
 
-    txtCircuit[0].setString(" LC  --");
-    txtCircuit[1].setString(" PB  --");
-    txtCircuit[2].setString(" BP  --");
-    txtCircuit[3].setString(" DDD --");
-    txtCircuit[4].setString(" MB  --");
-    txtCircuit[5].setString(" MaC --");
-    txtCircuit[6].setString(" DC  --");
-    txtCircuit[7].setString(" WS  --");
-    txtCircuit[8].setString(" SL  --");
-    txtCircuit[9].setString(" MuC --");
-    txtCircuit[10].setString(" YC  --");
-    txtCircuit[11].setString(" DKM --");
-    txtCircuit[12].setString(" WC  --");
-    txtCircuit[13].setString(" DDJ --");
-    txtCircuit[14].setString(" BC  --");
-    txtCircuit[15].setString(" RR  --");
+    txtCircuit[0].setString("LC");
+    txtCircuit[1].setString("PB");
+    txtCircuit[2].setString("BP");
+    txtCircuit[3].setString("DDD");
+    txtCircuit[4].setString("MB");
+    txtCircuit[5].setString("MaC");
+    txtCircuit[6].setString("DC");
+    txtCircuit[7].setString("WS");
+    txtCircuit[8].setString("SL");
+    txtCircuit[9].setString("MuC");
+    txtCircuit[10].setString("YC");
+    txtCircuit[11].setString("DKM");
+    txtCircuit[12].setString("WC");
+    txtCircuit[13].setString("DDJ");
+    txtCircuit[14].setString("BC");
+    txtCircuit[15].setString("RR");
 
     DWORD tpsTotalGC = 0x803A125C;
     DWORD scoreboard = 0x810933F0;
@@ -185,26 +200,11 @@ int main()
         if(scoreboard_v < 0)
         {
             //reset
-            txtCircuit[0].setString(" LC  --");
-            txtCircuit[1].setString(" PB  --");
-            txtCircuit[2].setString(" BP  --");
-            txtCircuit[3].setString(" DDD --");
-            txtCircuit[4].setString(" MB  --");
-            txtCircuit[5].setString(" MaC --");
-            txtCircuit[6].setString(" DC  --");
-            txtCircuit[7].setString(" WS  --");
-            txtCircuit[8].setString(" SL  --");
-            txtCircuit[9].setString(" MuC --");
-            txtCircuit[10].setString(" YC  --");
-            txtCircuit[11].setString(" DKM --");
-            txtCircuit[12].setString(" WC  --");
-            txtCircuit[13].setString(" DDJ --");
-            txtCircuit[14].setString(" BC  --");
-            txtCircuit[15].setString(" RR  --");
             for(int i=0; i<16; i++)
             {
                 fait[i] = 0;
                 txtDelta[i].setString("");
+                txtTempsCircuit[i].setString(" -- ");
             }
             txt.setString(" Total -- 00:00:000");
             txt.setFillColor(Color(255,255,255));
@@ -248,9 +248,9 @@ int main()
 
                     char buff[100];
 
-                    sprintf(buff,"%s %02d:%02d:%03d",((string)txtCircuit[i].getString()).c_str(),minute,sec,milli);
+                    sprintf(buff,"%s %02d:%02d:%03d",((string)txtTempsCircuit[i].getString()).c_str(),minute,sec,milli);
 
-                    txtCircuit[i].setString(buff);
+                    txtTempsCircuit[i].setString(buff);
                     if(pb[i] != 5999998)
                     {
                         int delta = value - pb[i];
@@ -346,6 +346,7 @@ int main()
         for(int i=0; i<16; i++)
         {
             win.draw(txtCircuit[i]);
+            win.draw(txtTempsCircuit[i]);
             win.draw(txtDelta[i]);
         }
         win.display();
