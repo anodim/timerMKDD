@@ -5,9 +5,10 @@
 #include <string>
 #include <fstream>
 
-#define FONT_TITLE_SIZE 33
+#define FONT_TITLE_SIZE 40
 #define FONT_SPLIT_SIZE 22
 
+#define IMG_SIZE 0.75f
 void littleBigEndian (int &x)
 {
     x = ((x >> 24) & 0xffL) | ((x >> 8) & 0xff00L) | ((x << 8) & 0xff0000L)
@@ -27,26 +28,35 @@ int main()
 
     Sprite img_s;
     img_s.setTexture(img);
-    img_s.setScale(0.75,0.75);
-    img_s.setPosition(10,20*FONT_SPLIT_SIZE);//425
-
-    int win_largeur = img.getSize().x/16*0.75;
-    int win_hauteur = 20*FONT_SPLIT_SIZE+img.getSize().y;
-
-    RenderWindow win(VideoMode(win_largeur+20,win_hauteur),"Ano\'s auto-spliter");
-
-    win.setPosition(Vector2i(1920,0));// a virer <----------------------------------------------------------------------------------------
-    win.setFramerateLimit(20);
+    img_s.setScale(IMG_SIZE,IMG_SIZE);
 
     Font arial;
     arial.loadFromFile("../../Font/pixelade.TTF");
     Text txt("Total -- 00:00:000",arial,FONT_TITLE_SIZE);
-    txt.setPosition((win_largeur/2)-(txt.getLocalBounds().width/2),0);
+
     Text txtCircuit[16];
     Text txtDelta[16];
     Text txtTempsCircuit[16];
     Text txtSomme("+00:00:000",arial,FONT_SPLIT_SIZE);
 
+    txtDelta[0].setString("LC -- 00:00:000 +00:00");
+
+    int imageMax = img.getSize().x/16*IMG_SIZE+30;
+    int textMax = 22*FONT_SPLIT_SIZE*0.45+30;
+
+    img_s.setPosition(0,FONT_TITLE_SIZE+FONT_SPLIT_SIZE+15+FONT_SPLIT_SIZE*17);
+
+    int win_largeur = (textMax > imageMax)?textMax:imageMax;
+    int win_hauteur = img_s.getGlobalBounds().top+img_s.getGlobalBounds().height;
+
+    RenderWindow win(VideoMode(win_largeur,win_hauteur+10),"Ano\'s auto-spliter");
+    txt.setPosition((win_largeur/2)-(txt.getGlobalBounds().width/2),0);
+
+    win.setPosition(Vector2i(1920,0));// a virer <----------------------------------------------------------------------------------------
+    win.setFramerateLimit(20);
+
+    img_s.setPosition((win_largeur/2)-(img_s.getGlobalBounds().width/16)/2,FONT_TITLE_SIZE+FONT_SPLIT_SIZE+15+FONT_SPLIT_SIZE*17);
+    img_s.setTextureRect(IntRect(0,0,img_s.getLocalBounds().width/16,img_s.getLocalBounds().height));
 
     //fichier pb
     int pb[17];
@@ -80,16 +90,17 @@ int main()
     {
         txtCircuit[i].setCharacterSize(FONT_SPLIT_SIZE);
         txtCircuit[i].setFont(arial);
-        txtCircuit[i].setPosition(30,(3+i)*FONT_SPLIT_SIZE);
+        txtCircuit[i].setPosition(30,FONT_TITLE_SIZE+FONT_SPLIT_SIZE+i*FONT_SPLIT_SIZE+15);
 
         txtTempsCircuit[i].setCharacterSize(FONT_SPLIT_SIZE);
         txtTempsCircuit[i].setFont(arial);
-        txtTempsCircuit[i].setPosition(30+40,(3+i)*FONT_SPLIT_SIZE);
+        txtTempsCircuit[i].setPosition(30+40,FONT_TITLE_SIZE+FONT_SPLIT_SIZE+i*FONT_SPLIT_SIZE+15);
         txtTempsCircuit[i].setString(" -- ");
 
         txtDelta[i].setCharacterSize(FONT_SPLIT_SIZE);
         txtDelta[i].setFont(arial);
-        txtDelta[i].setPosition(175,(3+i)*FONT_SPLIT_SIZE);
+        txtDelta[i].setPosition(175,FONT_TITLE_SIZE+FONT_SPLIT_SIZE+i*FONT_SPLIT_SIZE+15);
+        txtDelta[i].setString("");
     }
 
     txtSomme.setPosition((win_largeur/2)-(txtSomme.getLocalBounds().width/2),FONT_TITLE_SIZE);
@@ -207,7 +218,7 @@ int main()
                 txtDelta[i].setString("");
                 txtTempsCircuit[i].setString(" -- ");
             }
-            txt.setString(" Total -- 00:00:000");
+            txt.setString("Total -- 00:00:000");
             txt.setFillColor(Color(255,255,255));
             somme_pb = 0;
             txtSomme.setString("");
@@ -240,7 +251,7 @@ int main()
                     fait[i] = 1;
                     nbFait++;
 
-                    img_s.setTextureRect(IntRect(306*nbFait,0,306,161));
+                    img_s.setTextureRect(IntRect(img_s.getLocalBounds().width*nbFait,0,img_s.getLocalBounds().width,img_s.getLocalBounds().height));
 
                     newPb[i] = value;
                     minute = (value/1000)/60;
@@ -250,8 +261,11 @@ int main()
                     char buff[100];
 
                     sprintf(buff,"%s %02d:%02d:%03d",((string)txtTempsCircuit[i].getString()).c_str(),minute,sec,milli);
-
                     txtTempsCircuit[i].setString(buff);
+
+                    txtDelta[i].setPosition(txtTempsCircuit[i].getGlobalBounds().left+txtTempsCircuit[i].getGlobalBounds().width+15
+                                            ,FONT_TITLE_SIZE+FONT_SPLIT_SIZE+i*FONT_SPLIT_SIZE+15);
+
                     if(pb[i] != 5999998)
                     {
                         int delta = value - pb[i];
@@ -335,7 +349,7 @@ int main()
 
             char buff[100];
 
-            sprintf(buff," Total -- %02d:%02d:%03d",minute,sec,milli);
+            sprintf(buff,"Total -- %02d:%02d:%03d",minute,sec,milli);
 
             txt.setString(buff);
         }
