@@ -27,12 +27,13 @@ int main()
 
     Sprite img_s;
     img_s.setTexture(img);
-    img_s.setPosition(0,20*FONT_SPLIT_SIZE);//425
+    img_s.setScale(0.75,0.75);
+    img_s.setPosition(10,20*FONT_SPLIT_SIZE);//425
 
-    int win_largeur = img.getSize().x/16;
+    int win_largeur = img.getSize().x/16*0.75;
     int win_hauteur = 20*FONT_SPLIT_SIZE+img.getSize().y;
 
-    RenderWindow win(VideoMode(win_largeur,win_hauteur),"Ano\'s auto-spliter");
+    RenderWindow win(VideoMode(win_largeur+20,win_hauteur),"Ano\'s auto-spliter");
 
     win.setPosition(Vector2i(1920,0));// a virer <----------------------------------------------------------------------------------------
     win.setFramerateLimit(20);
