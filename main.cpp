@@ -6,7 +6,7 @@
 #include <fstream>
 
 #define FONT_TITLE_SIZE 40
-#define FONT_SPLIT_SIZE 28
+#define FONT_SPLIT_SIZE 27
 
 #define IMG_SIZE 0.90f
 
@@ -30,6 +30,26 @@ int newPb[17];
 int win_largeur;
 int win_hauteur;
 RenderWindow *win;
+
+DWORD tpsTotalGC;
+DWORD scoreboard;
+DWORD circuit[16];
+DWORD address;
+
+DWORD pid;
+HWND hwnd;
+HANDLE phandle;
+
+int value;
+int fait[16];
+int somme_pb;
+int nbFait;
+
+int minute;
+int sec;
+int milli;
+
+char buff[100];
 
 ifstream fichier("pbMKDD.txt");
 /* ============================================== */
@@ -69,12 +89,6 @@ void init()
 
     img_s.setPosition((win_largeur/2)-(img_s.getGlobalBounds().width/16)/2,FONT_TITLE_SIZE+FONT_SPLIT_SIZE+15+FONT_SPLIT_SIZE*17); // positionnement definitif de l'image
     img_s.setTextureRect(IntRect(0,0,img_s.getLocalBounds().width/16,img_s.getLocalBounds().height)); // mise en place du masque
-}
-/* ============================================== */
-
-int main()
-{
-    init();
 
     if(fichier)
     {
@@ -99,7 +113,7 @@ int main()
         }
     }
 
-    for(int i=0; i<16; i++)
+     for(int i=0; i<16; i++)
     {
         txtCircuit[i].setCharacterSize(FONT_SPLIT_SIZE);
         txtCircuit[i].setFont(arial);
@@ -136,9 +150,6 @@ int main()
     txtCircuit[14].setString("BC");
     txtCircuit[15].setString("RR");
 
-    DWORD tpsTotalGC = 0x803A125C;
-    DWORD scoreboard = 0x810933F0;
-
     DWORD luigi_circuit = 0x8113F248;
     DWORD peach_beach = 0x8114B748;
     DWORD baby_park = 0x8112D848;
@@ -155,8 +166,6 @@ int main()
     DWORD dino_dino_jungle = 0x8113C9E8;
     DWORD bowser_castle = 0x81144428;
     DWORD rainbow_road = 0x810F5F08;
-
-    DWORD circuit[16];
 
     circuit[0] = luigi_circuit;
     circuit[1] = peach_beach;
@@ -175,21 +184,51 @@ int main()
     circuit[14] = bowser_castle;
     circuit[15] = rainbow_road;
 
-    DWORD address = 0x803A125C; // This is the address that we want to read from
-    int value = 0; // This will store our value. In my case, its an integer, which is the timer
-    DWORD pid; //This will store our Process ID, used to read/write into the memory
-    HWND hwnd = 0; //Finally a handle to our window
+    tpsTotalGC = 0x803A125C;
+    scoreboard = 0x810933F0;
 
-    int fait[16];
+    address = tpsTotalGC;
+    value = 0;
+    hwnd = 0; // handle
+
     for(int i=0; i<16; i++)
         fait[i] = 0;
 
-    int somme_pb = 0;
-    int nbFait = 0;
-    while(win->isOpen())
+    somme_pb = 0;
+    nbFait = 0;
+}
+
+void reset()
+{
+    for(int i=0; i<16; i++)
+    {
+        fait[i] = 0;
+        txtDelta[i].setString("");
+        txtTempsCircuit[i].setString(" -- ");
+    }
+    txt.setString("Total -- 00:00:000");
+    txt.setFillColor(Color(255,255,255));
+    somme_pb = 0;
+    txtSomme.setString("");
+    nbFait = 0;
+}
+
+void readMemory(int &v)
+{
+    ReadProcessMemory(phandle,(void*)address,&v,sizeof(value),0); //lecture mem
+    littleBigEndian(v); // on remet les valeurs dans le bon sens ;)
+}
+
+/* ============================================== */
+
+int main()
+{
+    init();
+
+    while(win->isOpen()) // on quitte le prg quand on ferme la fenetre
     {
         Event event;
-        while(win->pollEvent(event))
+        while(win->pollEvent(event)) // boucle des events
         {
             if(Keyboard::isKeyPressed(Keyboard::Escape))
                 win->close();
@@ -197,66 +236,52 @@ int main()
                 win->close();
         }
 
-        int minute = 0;
-        int sec = 0;
-        int milli = 0;
+        minute = 0;
+        sec = 0;
+        milli = 0;
 
-
+        // on trouve dolphin lorsqu'il s'ouvre
         if(!hwnd)
         {
             hwnd = FindWindow(NULL,"Dolphin 5.0");
         }
 
-        HANDLE phandle = 0;
-        if(!phandle) //Once again, if it fails, tell us
+        // save id du process + access read
+        phandle = 0;
+        if(!phandle)
         {
-            GetWindowThreadProcessId(hwnd,&pid); //Get the process id and place it in pid
-            phandle = OpenProcess(PROCESS_VM_READ,0,pid); //Get permission to read
+            GetWindowThreadProcessId(hwnd,&pid); // get process id
+            phandle = OpenProcess(PROCESS_VM_READ,0,pid); // Get permission to read
         }
 
         address = scoreboard;
-        ReadProcessMemory(phandle,(void*)address,&value,sizeof(value),0);
-        littleBigEndian(value);
+        readMemory(value);
+
         int scoreboard_v = value;
 
-        char buff[100]; // code nul pour corriger un bug
-        sprintf(buff,"%d",value); // pareil
+        sprintf(buff,"%d",value); // code pouris pour corriger un bug
 
-        if(scoreboard_v < 0)
+        if(scoreboard_v < 0) // scorboard_v est negatif lors du menu
         {
-            //reset
-            for(int i=0; i<16; i++)
-            {
-                fait[i] = 0;
-                txtDelta[i].setString("");
-                txtTempsCircuit[i].setString(" -- ");
-            }
-            txt.setString("Total -- 00:00:000");
-            txt.setFillColor(Color(255,255,255));
-            somme_pb = 0;
-            txtSomme.setString("");
-            nbFait = 0;
+            reset();
         }
         else
         {
-
             for(int i=0; i<16; i++)
             {
                 address = circuit[i];
-                ReadProcessMemory(phandle,(void*)address,&value,sizeof(value),0);
-                littleBigEndian(value);
+                readMemory(value);
 
                 int value2;
                 if(fait[i] != 1)
                 {
                     address = circuit[i] + 0x20;
-                    ReadProcessMemory(phandle,(void*)address,&value2,sizeof(value2),0);
-                    littleBigEndian(value2);
+
+                    readMemory(value2);
                     if(value2 == scoreboard_v)
                     {
                         value = value2;
                     }
-
                 }
 
                 if(value == scoreboard_v && fait[i] != 1 && scoreboard_v != 0)
@@ -270,8 +295,6 @@ int main()
                     minute = (value/1000)/60;
                     sec = (value/1000)%60;
                     milli = value - (value/1000)*1000;
-
-                    char buff[100];
 
                     sprintf(buff,"%s %02d:%02d:%03d",((string)txtTempsCircuit[i].getString()).c_str(),minute,sec,milli);
                     txtTempsCircuit[i].setString(buff);
@@ -329,8 +352,7 @@ int main()
             }
 
             address = tpsTotalGC;
-            ReadProcessMemory(phandle,(void*)address,&value,sizeof(value),0);
-            littleBigEndian(value);
+            readMemory(value);
 
             minute = (value/1000)/60;
             sec = (value/1000)%60;
