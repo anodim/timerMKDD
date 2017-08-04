@@ -6,66 +6,79 @@
 #include <fstream>
 
 #define FONT_TITLE_SIZE 40
-#define FONT_SPLIT_SIZE 22
+#define FONT_SPLIT_SIZE 28
 
-#define IMG_SIZE 0.75f
+#define IMG_SIZE 0.90f
+
+using namespace std;
+using namespace sf;
+
+/* =================== GLOBAL =================== */
+Texture img;
+Sprite img_s;
+Font arial;
+
+Text txt("Total -- 00:00:000",arial,FONT_TITLE_SIZE);
+
+Text txtCircuit[16];
+Text txtDelta[16];
+Text txtTempsCircuit[16];
+Text txtSomme("+00:00:000",arial,FONT_SPLIT_SIZE);
+
+int pb[17];
+int newPb[17];
+int win_largeur;
+int win_hauteur;
+RenderWindow *win;
+
+ifstream fichier("pbMKDD.txt");
+/* ============================================== */
+
+/* ================== FONCTION ================== */
 void littleBigEndian (int &x)
 {
     x = ((x >> 24) & 0xffL) | ((x >> 8) & 0xff00L) | ((x << 8) & 0xff0000L)
         | ((x << 24) & 0xff000000L);
 }
 
-using namespace std;
-using namespace sf;
-
-int main()
+void init()
 {
-    Texture img;
+    // Chargement de l'image
     if(img.loadFromFile("img.png"))
     {
       //img non charger
     }
-
-    Sprite img_s;
     img_s.setTexture(img);
     img_s.setScale(IMG_SIZE,IMG_SIZE);
+    img_s.setPosition(0,FONT_TITLE_SIZE+FONT_SPLIT_SIZE+15+FONT_SPLIT_SIZE*17); // maj de la pos vertical pour calc de la hauteur de la fenetre
 
-    Font arial;
-    arial.loadFromFile("../../Font/pixelade.TTF");
-    Text txt("Total -- 00:00:000",arial,FONT_TITLE_SIZE);
+    arial.loadFromFile("../../Font/pixelade.TTF"); //chargemet, de la font
 
-    Text txtCircuit[16];
-    Text txtDelta[16];
-    Text txtTempsCircuit[16];
-    Text txtSomme("+00:00:000",arial,FONT_SPLIT_SIZE);
+    int imageMax = img.getSize().x/16*IMG_SIZE+30; // calc de la largeur pour le txt
+    int textMax = 22*FONT_SPLIT_SIZE*0.45+30; // calc de la largeur pour l'image
 
-    txtDelta[0].setString("LC -- 00:00:000 +00:00");
+    win_largeur = (textMax > imageMax)?textMax:imageMax; // maj de la largeur max
+    win_hauteur = img_s.getGlobalBounds().top+img_s.getGlobalBounds().height;
 
-    int imageMax = img.getSize().x/16*IMG_SIZE+30;
-    int textMax = 22*FONT_SPLIT_SIZE*0.45+30;
+    win = new RenderWindow(VideoMode(win_largeur,win_hauteur+10),"Ano\'s auto-spliter"); // ouverture de la fenetre
 
-    img_s.setPosition(0,FONT_TITLE_SIZE+FONT_SPLIT_SIZE+15+FONT_SPLIT_SIZE*17);
+    win->setPosition(Vector2i(1920,0));// a virer <----------------------------------------------------------------------------------------
+    win->setFramerateLimit(30); // reduit le framerate, augmentation de perf
 
-    int win_largeur = (textMax > imageMax)?textMax:imageMax;
-    int win_hauteur = img_s.getGlobalBounds().top+img_s.getGlobalBounds().height;
+    txt.setPosition((win_largeur/2)-(txt.getGlobalBounds().width/2),0); // positionnement du total
 
-    RenderWindow win(VideoMode(win_largeur,win_hauteur+10),"Ano\'s auto-spliter");
-    txt.setPosition((win_largeur/2)-(txt.getGlobalBounds().width/2),0);
+    img_s.setPosition((win_largeur/2)-(img_s.getGlobalBounds().width/16)/2,FONT_TITLE_SIZE+FONT_SPLIT_SIZE+15+FONT_SPLIT_SIZE*17); // positionnement definitif de l'image
+    img_s.setTextureRect(IntRect(0,0,img_s.getLocalBounds().width/16,img_s.getLocalBounds().height)); // mise en place du masque
+}
+/* ============================================== */
 
-    win.setPosition(Vector2i(1920,0));// a virer <----------------------------------------------------------------------------------------
-    win.setFramerateLimit(20);
+int main()
+{
+    init();
 
-    img_s.setPosition((win_largeur/2)-(img_s.getGlobalBounds().width/16)/2,FONT_TITLE_SIZE+FONT_SPLIT_SIZE+15+FONT_SPLIT_SIZE*17);
-    img_s.setTextureRect(IntRect(0,0,img_s.getLocalBounds().width/16,img_s.getLocalBounds().height));
-
-    //fichier pb
-    int pb[17];
-    int newPb[17];
-    ifstream fichier("pbMKDD.txt");
     if(fichier)
     {
         string ligne;
-
 
         for(int i=0; i<17; i++)
         {
@@ -173,15 +186,15 @@ int main()
 
     int somme_pb = 0;
     int nbFait = 0;
-    while(win.isOpen())
+    while(win->isOpen())
     {
         Event event;
-        while(win.pollEvent(event))
+        while(win->pollEvent(event))
         {
             if(Keyboard::isKeyPressed(Keyboard::Escape))
-                win.close();
+                win->close();
             if(event.type == Event::Closed)
-                win.close();
+                win->close();
         }
 
         int minute = 0;
@@ -354,18 +367,20 @@ int main()
             txt.setString(buff);
         }
 
-        win.clear();
-        win.draw(img_s);
-        win.draw(txt);
-        win.draw(txtSomme);
+        win->clear();
+        win->draw(img_s);
+        win->draw(txt);
+        win->draw(txtSomme);
         for(int i=0; i<16; i++)
         {
-            win.draw(txtCircuit[i]);
-            win.draw(txtTempsCircuit[i]);
-            win.draw(txtDelta[i]);
+            win->draw(txtCircuit[i]);
+            win->draw(txtTempsCircuit[i]);
+            win->draw(txtDelta[i]);
         }
-        win.display();
+        win->display();
     }
+
+    delete(win);
 
     return 0;
 }
