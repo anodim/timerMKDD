@@ -21,8 +21,8 @@ int main()
     win.setFramerateLimit(20);
 
     Font arial;
-    arial.loadFromFile("../../Font/cour.ttf");
-    Text txt(" Temps totals    -- 00 : 00 : 000",arial,22);
+    arial.loadFromFile("../../Font/pixelade.TTF");
+    Text txt(" Temps totals    -- 00 : 00 : 000",arial,33);
     txt.setPosition(0,10);
     Text txtCircuit[16];
     Text txtDelta[16];
@@ -181,7 +181,6 @@ int main()
 
         char buff[100]; // code nul pour corriger un bug
         sprintf(buff,"%d",value); // pareil
-
 
         if(scoreboard_v < 0)
         {
