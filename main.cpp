@@ -82,7 +82,7 @@ void init()
 
     win = new RenderWindow(VideoMode(win_largeur,win_hauteur+10),"Ano\'s auto-spliter"); // ouverture de la fenetre
 
-    win->setPosition(Vector2i(1920,0));// a virer <----------------------------------------------------------------------------------------
+    //win->setPosition(Vector2i(1920,0));// a virer <----------------------------------------------------------------------------------------
     win->setFramerateLimit(30); // reduit le framerate, augmentation de perf
 
     txt.setPosition((win_largeur/2)-(txt.getGlobalBounds().width/2),0); // positionnement du total
