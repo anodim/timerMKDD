@@ -412,18 +412,19 @@ int main()
 
                         if(delta > 0)
                         {
+
+                            txtDelta[i].setFillColor(Color(255,0,0));
+                            sprintf(buff,"+%02d:%02d",minute,sec);
+                        }
+                        else
+                        {
                             if(isGold)
                             {
                                 txtDelta[i].setFillColor(Color(204,153,0));
                             }
                             else{
-                                txtDelta[i].setFillColor(Color(255,0,0));
+                                txtDelta[i].setFillColor(Color(0,255,0));
                             }
-                            sprintf(buff,"+%02d:%02d",minute,sec);
-                        }
-                        else
-                        {
-                            txtDelta[i].setFillColor(Color(0,255,0));
                             sprintf(buff,"-%02d:%02d",minute,sec);
                         }
 
