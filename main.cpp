@@ -19,6 +19,7 @@ Sprite img_s;
 Font arial;
 
 Text txt("Total -- 00:00:000",arial,FONT_TITLE_SIZE);
+Text txt("PB    -- 00:00:000",arial,FONT_TITLE_SIZE);
 
 Text txtCircuit[16];
 Text txtDelta[16];
