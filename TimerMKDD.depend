@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1502110482 source:d:\c++\timer mkdd\main.cpp
+1502144371 source:d:\c++\timer mkdd\main.cpp
 	<iostream>
 	<SFML/Graphics.hpp>
 	<windows.h>
