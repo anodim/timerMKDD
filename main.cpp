@@ -131,7 +131,7 @@ void init()
 
         for(int i=0; i<17; i++)
         {
-            getline(fichier,ligne);
+            getline(fichier_gold,ligne);
             gold[i]       = atoi(ligne.c_str());
         }
     }
@@ -373,7 +373,7 @@ int main()
                                             ,FONT_TITLE_SIZE+FONT_SPLIT_SIZE+i*FONT_SPLIT_SIZE+15);
 
 
-                    if(gold[i] != 5999998 || (gold[i] != 5999998 && value < gold[i]))
+                    if(value < gold[i])
                     {
                         newGold[i]  = value;
                         isGold      = true;
