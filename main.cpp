@@ -375,12 +375,12 @@ int main()
 
                     if(gold[i] != 5999998 || (gold[i] != 5999998 && value < gold[i]))
                     {
-                        newGold[i]  = value; 
+                        newGold[i]  = value;
                         isGold      = true;
                     }
                     else{
                         newGold[i]  = gold[i];
-                        isGold      = false;   
+                        isGold      = false;
                     }
 
                     if(pb[i] != 5999998)
