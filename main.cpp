@@ -124,7 +124,7 @@ void init()
         }
     }
 
-    //gold splits
+    //gold split
     if(fichier_gold)
     {
         string ligne;
