@@ -94,7 +94,7 @@ void init()
 
     txt.setPosition((win_largeur/2)-(txt.getGlobalBounds().width/2),0); // positionnement du total
 
-    txt_pb.setPosition((win_largeur/2)-(txt.getGlobalBounds().width/2),FONT_TITLE_SIZE); // positionnement du PB
+    txt_pb.setPosition((win_largeur/2)-(txt_pb.getGlobalBounds().width/2),FONT_TITLE_SIZE); // positionnement du PB
 
     img_s.setPosition((win_largeur/2)-(img_s.getGlobalBounds().width/16)/2,FONT_TITLE_SIZE+FONT_SPLIT_SIZE+15+FONT_SPLIT_SIZE*17); // positionnement definitif de l'image
     img_s.setTextureRect(IntRect(0,0,img_s.getLocalBounds().width/16,img_s.getLocalBounds().height)); // mise en place du masque
@@ -108,7 +108,7 @@ void init()
         {
             getline(fichier,ligne);
             pb[i]       = atoi(ligne.c_str());
-            current_pb  += pb[i];
+            current_pb  = pb[16];
         }
     }
     else
@@ -156,7 +156,7 @@ void init()
 
         char buff_pb[100];
 
-        sprintf(buff_pb,"Total -- %02d:%02d:%03d",minute,sec,milli);
+        sprintf(buff_pb,"PB -- %02d:%02d:%03d",minute,sec,milli);
 
         txt_pb.setString(buff_pb);
 
@@ -272,7 +272,7 @@ void reset()
 
         char buff_pb[100];
 
-        sprintf(buff_pb,"Total -- %02d:%02d:%03d",minute,sec,milli);
+        sprintf(buff_pb,"PB -- %02d:%02d:%03d",minute,sec,milli);
 
         txt_pb.setString(buff_pb);
 
@@ -489,7 +489,7 @@ int main()
         win->draw(img_s);
         win->draw(txt_pb);
         win->draw(txt);
-        win->draw(txtSomme);
+        //win->draw(txtSomme);
         for(int i=0; i<16; i++)
         {
             win->draw(txtCircuit[i]);
