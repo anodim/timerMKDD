@@ -8,6 +8,7 @@
 #define FONT_TITLE_SIZE 40
 #define FONT_PB_SIZE 40
 #define FONT_SPLIT_SIZE 27
+#define BORDURE 15
 
 #define IMG_SIZE 0.90f
 
@@ -20,12 +21,12 @@ Sprite img_s;
 Font arial;
 
 Text txt("Total -- 00:00:000",arial,FONT_TITLE_SIZE);
-Text txt_pb("PB -- 00:00:000",arial,FONT_TITLE_SIZE);
+Text txt_pb("PB -- 00:00:000",arial,FONT_PB_SIZE);
 
 Text txtCircuit[16];
 Text txtDelta[16];
 Text txtTempsCircuit[16];
-Text txtSomme("+00:00:000",arial,FONT_SPLIT_SIZE);
+Text txtSomme("",arial,FONT_SPLIT_SIZE);//("+00:00:000",arial,FONT_SPLIT_SIZE);
 
 int pb[17];
 int newPb[17];
@@ -54,6 +55,9 @@ int minute;
 int sec;
 int milli;
 
+int ligne_posV;
+int img_posV;
+
 char buff[100];
 
 bool isGold;
@@ -76,9 +80,12 @@ void init()
     {
       //img non chargée
     }
+
+    img_posV = 2*FONT_TITLE_SIZE+FONT_PB_SIZE+FONT_SPLIT_SIZE*17;
+
     img_s.setTexture(img);
     img_s.setScale(IMG_SIZE,IMG_SIZE);
-    img_s.setPosition(0,FONT_TITLE_SIZE+FONT_PB_SIZE+FONT_SPLIT_SIZE+15+FONT_SPLIT_SIZE*17); // maj de la pos vertical pour calc de la hauteur de la fenetre
+    img_s.setPosition(0,img_posV); // maj de la pos vertical pour calc de la hauteur de la fenetre
 
     arial.loadFromFile("../../Font/pixelade.TTF"); //chargement, de la font
 
@@ -88,15 +95,15 @@ void init()
     win_largeur = (textMax > imageMax)?textMax:imageMax; // maj de la largeur max
     win_hauteur = img_s.getGlobalBounds().top+img_s.getGlobalBounds().height;
 
-    win = new RenderWindow(VideoMode(win_largeur,win_hauteur+10),"Ano\'s auto-spliter"); // ouverture de la fenetre
+    win = new RenderWindow(VideoMode(win_largeur,win_hauteur+BORDURE),"Timer MKDD"); // ouverture de la fenetre
 
     win->setFramerateLimit(30); // reduit le framerate, augmentation de perf
 
     txt.setPosition((win_largeur/2)-(txt.getGlobalBounds().width/2),0); // positionnement du total
 
-    txt_pb.setPosition((win_largeur/2)-(txt_pb.getGlobalBounds().width/2),FONT_TITLE_SIZE); // positionnement du PB
+    txt_pb.setPosition((win_largeur/2)-(txt_pb.getGlobalBounds().width/2),FONT_TITLE_SIZE+FONT_SPLIT_SIZE); // positionnement du PB
 
-    img_s.setPosition((win_largeur/2)-(img_s.getGlobalBounds().width/16)/2,FONT_TITLE_SIZE+FONT_SPLIT_SIZE+15+FONT_SPLIT_SIZE*17); // positionnement definitif de l'image
+    img_s.setPosition((win_largeur/2)-(img_s.getGlobalBounds().width/16)/2,img_posV); // positionnement definitif de l'image
     img_s.setTextureRect(IntRect(0,0,img_s.getLocalBounds().width/16,img_s.getLocalBounds().height)); // mise en place du masque
 
     current_pb = 0;
@@ -163,24 +170,28 @@ void init()
     }
 
 
-     for(int i=0; i<16; i++)
+    for(int i=0; i<16; i++)
     {
+        ligne_posV = 2*FONT_TITLE_SIZE+FONT_SPLIT_SIZE+BORDURE+FONT_SPLIT_SIZE*i;
+
         txtCircuit[i].setCharacterSize(FONT_SPLIT_SIZE);
         txtCircuit[i].setFont(arial);
-        txtCircuit[i].setPosition(30,FONT_TITLE_SIZE+FONT_SPLIT_SIZE+i*FONT_SPLIT_SIZE+15);
+        txtCircuit[i].setPosition(2*BORDURE,ligne_posV);
+        txtCircuit[i].setString("DDDD");
 
         txtTempsCircuit[i].setCharacterSize(FONT_SPLIT_SIZE);
         txtTempsCircuit[i].setFont(arial);
-        txtTempsCircuit[i].setPosition(30+40,FONT_TITLE_SIZE+FONT_SPLIT_SIZE+i*FONT_SPLIT_SIZE+15);
+        txtTempsCircuit[i].setPosition(2*BORDURE+txtCircuit[i].getGlobalBounds().width,ligne_posV);
         txtTempsCircuit[i].setString(" -- ");
 
         txtDelta[i].setCharacterSize(FONT_SPLIT_SIZE);
         txtDelta[i].setFont(arial);
-        txtDelta[i].setPosition(175,FONT_TITLE_SIZE+FONT_SPLIT_SIZE+i*FONT_SPLIT_SIZE+15);
+        txtDelta[i].setPosition(2*BORDURE+txtCircuit[i].getGlobalBounds().width+txtTempsCircuit[i].getGlobalBounds().width
+                                ,ligne_posV);
         txtDelta[i].setString("");
     }
 
-    txtSomme.setPosition((win_largeur/2)-(txtSomme.getLocalBounds().width/2),FONT_TITLE_SIZE);
+    txtSomme.setPosition((win_largeur/2)-(txtSomme.getGlobalBounds().width/2),FONT_TITLE_SIZE+3);
     txtSomme.setString("");
 
     txtCircuit[0].setString("LC");
@@ -369,9 +380,8 @@ int main()
                     sprintf(buff,"%s %02d:%02d:%03d",((string)txtTempsCircuit[i].getString()).c_str(),minute,sec,milli);
                     txtTempsCircuit[i].setString(buff);
 
-                    txtDelta[i].setPosition(txtTempsCircuit[i].getGlobalBounds().left+txtTempsCircuit[i].getGlobalBounds().width+15
-                                            ,FONT_TITLE_SIZE+FONT_SPLIT_SIZE+i*FONT_SPLIT_SIZE+15);
-
+                    txtDelta[i].setPosition(txtTempsCircuit[i].getGlobalBounds().left+txtTempsCircuit[i].getGlobalBounds().width+BORDURE
+                                            ,2*FONT_TITLE_SIZE+FONT_SPLIT_SIZE+i*FONT_SPLIT_SIZE+BORDURE);
 
                     if(value < gold[i])
                     {
@@ -489,7 +499,7 @@ int main()
         win->draw(img_s);
         win->draw(txt_pb);
         win->draw(txt);
-        //win->draw(txtSomme);
+        win->draw(txtSomme);
         for(int i=0; i<16; i++)
         {
             win->draw(txtCircuit[i]);
