@@ -472,12 +472,13 @@ int main()
                 if(tmp == newPb[16])
                 {
                     txt.setFillColor(Color(255,0,0));
-                    if(pb[16]>newPb[16])
+                    if(pb[16]>newPb[16]) // nouveau pb
                     {
                         txt.setFillColor(Color(0,255,0));
                         ofstream file("pbMKDD.txt",ios::out | ios::trunc);
                         for(int i=0; i<17; i++)
                         {
+                            pb[i] = newPb[i];
                             // ecrire nouveau fichier
                             file << newPb[i] << endl;
                         }
