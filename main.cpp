@@ -78,7 +78,7 @@ void init()
     // Chargement de l'image
     if(img.loadFromFile("img.png"))
     {
-      //img non chargÃ©e
+      //img non chargée
     }
 
     img_posV = 2*FONT_TITLE_SIZE+FONT_PB_SIZE+FONT_SPLIT_SIZE*17;
@@ -122,7 +122,7 @@ void init()
     else
     {
         ofstream file("log.txt",ios_base::app);
-        file << "fichier non trouvÃ©" << endl;
+        file << "fichier non trouvé" << endl;
 
         for(int i=0; i<17; i++)
         {
@@ -146,7 +146,7 @@ void init()
     else
     {
         ofstream file("log.txt",ios_base::app);
-        file << "fichier non trouvÃ©" << endl;
+        file << "fichier non trouvé" << endl;
 
         for(int i=0; i<17; i++)
         {
@@ -472,12 +472,13 @@ int main()
                 if(tmp == newPb[16])
                 {
                     txt.setFillColor(Color(255,0,0));
-                    if(pb[16]>newPb[16])
+                    if(pb[16]>newPb[16]) // nouveau pb
                     {
                         txt.setFillColor(Color(0,255,0));
                         ofstream file("pbMKDD.txt",ios::out | ios::trunc);
                         for(int i=0; i<17; i++)
                         {
+                            pb[i] = newPb[i];
                             // ecrire nouveau fichier
                             file << newPb[i] << endl;
                         }
