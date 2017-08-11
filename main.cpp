@@ -98,6 +98,7 @@ void init()
     win = new RenderWindow(VideoMode(win_largeur,win_hauteur+BORDURE),"Timer MKDD"); // ouverture de la fenetre
 
     win->setFramerateLimit(30); // reduit le framerate, augmentation de perf
+    win->setVerticalSyncEnabled(true);
 
     txt.setPosition((win_largeur/2)-(txt.getGlobalBounds().width/2),0); // positionnement du total
 
@@ -291,6 +292,7 @@ void reset()
 
     somme_pb    = 0;
     nbFait      = 0;
+    img_s.setTextureRect(IntRect(img_s.getLocalBounds().width*nbFait,0,img_s.getLocalBounds().width,img_s.getLocalBounds().height));
     txtSomme.setString("");
 }
 
@@ -459,6 +461,8 @@ int main()
 
             if(fait[15] == 1) // fin
             {
+                nbFait = 0;
+                img_s.setTextureRect(IntRect(img_s.getLocalBounds().width*nbFait,0,img_s.getLocalBounds().width,img_s.getLocalBounds().height));
                 int tmp = 0;
                 for(int i=0; i<16; i++)
                 {
